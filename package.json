@@ -1,0 +1,14 @@
+{
+  "name": "wa-tg-bot",
+  "version": "1.0.0",
+  "main": "telegramBot.js",
+  "scripts": {
+    "start": "node telegramBot.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.6.0",
+    "pino": "^8.0.0",
+    "dotenv": "^16.0.0",
+    "node-telegram-bot-api": "^0.61.0"
+  }
+}
