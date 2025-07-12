@@ -10,35 +10,51 @@ async function startWhatsapp() {
         logger: pino({ level: "silent" }),
         auth: state,
         browser: ["Chrome", "Ubuntu", "10.0"],
-        printQRInTerminal: false
+        syncFullHistory: false,
+        markOnlineOnConnect: false,
+        generateHighQualityLinkPreview: false,
+        emitOwnEvents: true,
+        fireInitQueries: true,
+        connectTimeoutMs: 60_000,
+        defaultQueryTimeoutMs: 0,
     });
 
     sock.ev.on("creds.update", saveCreds);
+
     sock.ev.on("connection.update", ({ connection }) => {
         if (connection === "close") {
-            console.log("❌ قطع الاتصال، إعادة تشغيل...");
+            console.log("❌ تم قطع الاتصال، جارٍ إعادة الاتصال...");
             startWhatsapp();
+        } else if (connection === "open") {
+            console.log("✅ تم الاتصال بنجاح.");
         }
     });
 
-    console.log("✅ بوت واتساب شغّال");
+    console.log("🚀 بوت واتساب يعمل الآن...");
 }
 
 async function getPairingCode(phoneNumber) {
-    if (!sock) return null;
+    if (!sock || !sock.requestPairingCode) {
+        console.error("⚠️ لم يتم تهيئة الاتصال بعد!");
+        return null;
+    }
 
     try {
-        console.log("🔗 طلب رمز اقتران:", phoneNumber);
-        let code = await sock.requestPairingCode(phoneNumber);
-        code = code?.match(/.{1,4}/g)?.join("-") || code;
+        if (!phoneNumber.startsWith("+") || phoneNumber.length < 10) {
+            throw new Error("📛 الرقم غير صالح. تأكد من إدخاله بصيغة مثل: +9665XXXXXXX");
+        }
 
-        // تأخير لتفعيل إشعار الجهاز
-        await new Promise(r => setTimeout(r, 3000));
+        let code = await sock.requestPairingCode(phoneNumber);
+        if (!code) throw new Error("لم يتم استلام رمز من واتساب");
+
+        code = code.match(/.{1,4}/g)?.join("-") || code;
+
+        await new Promise(r => setTimeout(r, 3000)); // لإظهار إشعار واتساب
 
         return code;
 
     } catch (err) {
-        console.error("❌ خطأ:", err.message);
+        console.error("❌ خطأ أثناء توليد الرمز:", err.message);
         return null;
     }
 }
