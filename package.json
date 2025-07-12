@@ -1,5 +1,5 @@
 {
-  "name": "wa-tg-bot",
+  "name": "tg-wa-bot",
   "version": "1.0.0",
   "main": "telegramBot.js",
   "scripts": {
